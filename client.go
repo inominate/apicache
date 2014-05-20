@@ -430,8 +430,15 @@ func (c *Client) Do(r *Request) (retresp *Response, reterr error) {
 		c.panicReason = cR.Error.ErrorText
 		c.Unlock()
 	}
-	if resp.HTTPCode == 403 || (code >= 100 && code <= 299) {
+	if code >= 200 && code <= 223 {
 		resp.Invalidate = true
+
+		// Special check for :ccp:, if a /account/ endpoint is returning a 221
+		// it shouldn't actually be invalidated.
+		accountIndex := strings.Index(r.url, "account")
+		if code == 221 && (accountIndex == 0 || accountIndex == 1) {
+			resp.Invalidate = false
+		}
 	}
 
 	resp.Data = data
