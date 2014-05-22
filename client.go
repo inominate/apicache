@@ -433,10 +433,8 @@ func (c *Client) Do(r *Request) (retresp *Response, reterr error) {
 	if code >= 200 && code <= 223 {
 		resp.Invalidate = true
 
-		// Special check for :ccp:, if a /account/ endpoint is returning a 221
-		// it shouldn't actually be invalidated.
-		accountIndex := strings.Index(r.url, "account")
-		if code == 221 && (accountIndex == 0 || accountIndex == 1) {
+		// No idea what 221s are but they appear to be largely bogus
+		if code == 221 {
 			resp.Invalidate = false
 		}
 	}
