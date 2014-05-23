@@ -324,7 +324,8 @@ func (c *Client) Do(r *Request) (retresp *Response, reterr error) {
 			resp.HTTPCode = 504
 			resp.Data = SynthesizeAPIError(900, "This shouldn't happen.", 15*time.Minute)
 		}
-		if !r.NoCache {
+		// Honor requests not to cache, and never cache error 221s
+		if !r.NoCache && resp.Error.ErrorCode != 221 {
 			err := c.cacher.Store(cacheTag, resp.HTTPCode, resp.Data, resp.Expires)
 			if err != nil {
 				log.Printf("Cache Error: %s", err)
