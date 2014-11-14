@@ -337,7 +337,7 @@ func (c *Client) Do(r *Request) (retresp *Response, reterr error) {
 
 	tries := 0
 	var httpResp *http.Response
-	for tries < c.Retries {
+	for tries <= c.Retries {
 		tries++
 
 		httpResp, err = c.postForm(c.BaseURL+r.url, formValues)
