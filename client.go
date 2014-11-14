@@ -295,7 +295,7 @@ func (c *Client) Do(r *Request) (retresp *Response, reterr error) {
 	// If we're panicking, bail out early and spit back a fake error
 	c.RLock()
 	if c.panicUntil.After(time.Now()) {
-		DebugLog.Printf("Got Request, but we're currently panicing until %s", c.panicUntil.Format(sqlDateTime))
+		log.Printf("Got Request, but we're currently panicing until %s", c.panicUntil.Format(sqlDateTime))
 		data := SynthesizeAPIError(c.panicCode, c.panicReason, c.panicUntil.Sub(time.Now()))
 		c.RUnlock()
 
@@ -430,14 +430,15 @@ func (c *Client) Do(r *Request) (retresp *Response, reterr error) {
 		c.panicCode = code
 		c.panicReason = cR.Error.ErrorText
 		c.Unlock()
-	}
-	if code >= 200 && code <= 223 {
+	} else if code >= 200 && code <= 223 {
 		resp.Invalidate = true
 
 		// No idea what 221s are but they appear to be largely bogus
 		if code == 221 {
 			resp.Invalidate = false
 		}
+	} else if code == 108 {
+		resp.Invalidate = true
 	}
 
 	resp.Data = data
